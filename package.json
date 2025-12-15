@@ -5,7 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "lint": "npm run lint:source",
+    "lint": "npm run lint:shell && npm run lint:source",
+    "lint:shell": "shellcheck $(git ls-files '*.sh')",
     "lint:source": "eslint && prettier . --check",
     "lint:source:fix": "eslint --fix && prettier . --write --ignore-unknown",
     "prepare": "husky",

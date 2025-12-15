@@ -1,0 +1,44 @@
+# Enable checking for masked returns
+#
+# Why:
+#
+# - Reduces the chances of bugs due to error exit codes being masked in command
+#   substitutions.
+#
+# See: https://www.shellcheck.net/wiki/SC2312
+enable=check-extra-masked-returns
+
+# Enable requiring quotes for all variable references
+#
+# ✅ echo "${foo}"
+# ❌ echo ${foo}
+#
+# Why:
+#
+# - Increases consistency of references to variables – now they all have quotes.
+# - Reduces the mental overhead of deciding whether to quote or not.
+# – Reduce the risk of bugs in cases where ShellCheck does not have enough
+#   information about the contents of a variable so does not raise a warning
+#   about requiring quotes.
+#
+# See: https://www.shellcheck.net/wiki/SC2248
+enable=quote-safe-variables
+
+# Enable requiring braces around variables all the time
+#
+# ✅ echo "${foo}"
+# ❌ echo "$foo"
+#
+# Why:
+#
+# - JavaScript string interpolation and Bash parameter expansion is similar.
+#   Using the same syntax reduces the mental overhead in reading and writing.
+# - Increases consistency as there are times where braces are required; for
+#   example, when a string is joined to a variable (`${var}string`), or when
+#   setting a default (`${var:=default}`).
+# - Smaller diff when adding/removing a substitution, extraction, replacement,
+#   etc to a parameter expansion.
+#
+# See: https://www.shellcheck.net/wiki/SC2250
+# See: https://www.gnu.org/software/bash/manual/bash.html#Shell-Parameter-Expansion
+enable=require-variable-braces
