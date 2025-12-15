@@ -5,6 +5,7 @@ import markdown from '@eslint/markdown'
 import { defineConfig } from 'eslint/config'
 import prettier from 'eslint-config-prettier/flat'
 import importExport from 'eslint-plugin-import'
+import jest from 'eslint-plugin-jest'
 import { glob } from 'fs/promises'
 import globals from 'globals'
 import { resolve } from 'path'
@@ -67,6 +68,10 @@ export default defineConfig([
         },
       ],
     },
+  },
+  {
+    files: ['**/__tests__/**/*.[jt]s', '**/?(*.)+(spec|test).[jt]s'],
+    extends: [jest.configs['flat/recommended'], jest.configs['flat/style']],
   },
   {
     files: ['**/*.json'],

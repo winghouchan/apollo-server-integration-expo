@@ -5,9 +5,12 @@ const typeCheck = ['tsc --project tsconfig.json --noEmit']
 const lintSource = (files) => ['eslint --fix'].map(joinCommandWithFiles(files))
 const prettier = (files) =>
   ['prettier --write --ignore-unknown'].map(joinCommandWithFiles(files))
+const test = (files) =>
+  ['jest --passWithNoTests --findRelatedTests'].map(joinCommandWithFiles(files))
 
 export default {
   '**/!(*.{js,ts})': (files) => [...prettier(files)],
   '*.js': (files) => [...lintSource(files), ...prettier(files)],
   '*.ts': (files) => [...typeCheck, ...lintSource(files), ...prettier(files)],
+  '*.{js,ts}': (files) => [...test(files)],
 }
