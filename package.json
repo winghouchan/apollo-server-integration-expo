@@ -4,11 +4,28 @@
   "description": "An Apollo Server integration for use with Expo API Routes",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "lint": "npm run lint:source",
+    "lint:source": "eslint && prettier . --check",
+    "lint:source:fix": "eslint --fix && prettier . --write --ignore-unknown"
+  },
   "devDependencies": {
+    "@eslint/compat": "^2.0.0",
+    "@eslint/js": "^9.39.2",
+    "@eslint/json": "^0.14.0",
+    "@eslint/markdown": "^7.5.1",
     "@tsconfig/node-lts": "^24.0.0",
     "@tsconfig/recommended": "^1.0.13",
     "@tsconfig/strictest": "^2.0.8",
     "@types/node": "^25.0.2",
-    "typescript": "^5.9.3"
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^16.5.0",
+    "jiti": "^2.6.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.49.0"
   }
 }
