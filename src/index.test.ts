@@ -1,4 +1,4 @@
-import { ApolloServer } from '@apollo/server'
+import { ApolloServer, HeaderMap } from '@apollo/server'
 import { describe, expect, jest, test } from '@jest/globals'
 import startServerAndCreateHandler from '.'
 
@@ -26,5 +26,44 @@ describe('startServerAndCreateHandler', () => {
     expect(handlers).toHaveProperty('GET')
     expect(handlers).toHaveProperty('HEAD')
     expect(handlers).toHaveProperty('POST')
+  })
+})
+
+describe('handler', () => {
+  /**
+   * The user can start the server with a function to access the contextual data
+   * on each request:
+   *
+   * ```
+   * function context(request: Request) { ... }
+   *
+   * startServerAndCreateHandler(server, { context })
+   * ```
+   *
+   * This test ensures the context function is called with the correct data.
+   */
+  test('calls the context function with the request', async () => {
+    const context = jest.fn(async (_: Request) => ({}))
+    const server = new ApolloServer({ typeDefs: ``, resolvers: {} })
+    const { GET: handler } = startServerAndCreateHandler(server, {
+      context,
+    })
+
+    jest
+      .spyOn(server, 'executeHTTPGraphQLRequest')
+      .mockImplementation(async ({ context }) => {
+        context()
+
+        return {
+          headers: new Map() as HeaderMap,
+          body: { kind: 'complete', string: '' },
+        }
+      })
+
+    const request = new Request('http://example.com/graphql')
+
+    await handler(request)
+
+    expect(context).toHaveBeenCalledWith(request)
   })
 })
