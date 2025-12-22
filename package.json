@@ -10,7 +10,8 @@
     "lint:source": "eslint && prettier . --check",
     "lint:source:fix": "eslint --fix && prettier . --write --ignore-unknown",
     "prepare": "husky",
-    "test": "./scripts/test.sh"
+    "test": "./scripts/test.sh",
+    "test:coverage": "npm run test -- --coverage"
   },
   "devDependencies": {
     "@apollo/server": "^5.2.0",
