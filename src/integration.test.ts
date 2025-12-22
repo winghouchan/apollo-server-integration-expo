@@ -1,5 +1,6 @@
 import { ApolloServer } from '@apollo/server'
 import { defineIntegrationTestSuite } from '@apollo/server-integration-testsuite'
+import { StatusError } from 'expo-server'
 import { createRequestHandler } from 'expo-server/adapter/abstract'
 import { convertRequest } from 'expo-server/adapter/http'
 import { createServer } from 'http'
@@ -22,6 +23,7 @@ import startServerAndCreateHandler from '.'
  * middleware are not implemented because they have no purpose in the tests.
  *
  * @see {@link https://github.com/expo/expo/blob/0e2c03bda06df475b0fcb0d58c67c10a12dd2b69/packages/expo-server/src/vendor/abstract.ts | Source code for Expo Server's request handler}
+ * @see {@link https://github.com/expo/expo/blob/9d6f808e858f539dd534fb27b838abae1719604f/packages/expo-server/src/runtime/index.ts#L86-L92 | Source code for Expo Server's error handler}
  * @see {@link https://docs.expo.dev/router/web/api-routes/ | Documentation for Expo API Routes}
  */
 async function mockServer(routes: {
@@ -56,14 +58,50 @@ async function mockServer(routes: {
   })
 
   const httpServer = createServer(async (request, response) => {
-    const result = await handler(convertRequest(request, response))
+    try {
+      const result = await handler(convertRequest(request, response))
 
-    response.statusCode = result.status
-    response.setHeaders(result.headers)
+      response.statusCode = result.status
+      response.setHeaders(result.headers)
 
-    return result.body
-      ? Readable.fromWeb(result.body).pipe(response)
-      : response.end()
+      return result.body
+        ? Readable.fromWeb(result.body).pipe(response)
+        : response.end()
+    } catch (error) {
+      if (error instanceof Response) {
+        response.statusCode = error.status
+        response.setHeaders(error.headers)
+
+        return error.body
+          ? Readable.fromWeb(error.body).pipe(response)
+          : response.end()
+      } else if (error instanceof StatusError) {
+        response.statusCode = error.status
+        response.setHeader('Content-Type', 'application/json; charset=utf-8')
+
+        return response.end(error.body)
+      } else if (
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        typeof error.status === 'number' &&
+        ('body' in error || 'message' in error)
+      ) {
+        const body =
+          'body' in error && typeof error.body === 'string'
+            ? error.body
+            : 'message' in error
+              ? JSON.stringify({ error: error.message })
+              : undefined
+        response.statusCode = error.status
+
+        return response.end(body)
+      } else {
+        response.statusCode = 500
+
+        return response.end(`${error}`)
+      }
+    }
   })
 
   await new Promise<void>((resolve) => {
