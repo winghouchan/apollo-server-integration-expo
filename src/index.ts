@@ -4,6 +4,7 @@ import {
   ContextFunction,
   HeaderMap,
 } from '@apollo/server'
+import parseBody from './parseBody'
 
 type Handler = (request: Request) => Promise<Response>
 type Handlers = { GET: Handler; HEAD: Handler; POST: Handler }
@@ -57,30 +58,10 @@ function startServerAndCreateHandler<Context extends BaseContext>(
 
   async function handler(request: Request) {
     const httpGraphQLRequest = {
-      body: await request.text(),
+      body: await parseBody(request),
       headers: new HeaderMap(request.headers),
       method: request.method,
       search: new URL(request.url).searchParams.toString(),
-    }
-
-    if (
-      request.method === 'POST' &&
-      request.headers.get('Content-Type')?.includes('application/json')
-    ) {
-      try {
-        httpGraphQLRequest.body = JSON.parse(httpGraphQLRequest.body)
-      } catch (error) {
-        if (
-          typeof error === 'object' &&
-          error !== null &&
-          'message' in error &&
-          typeof error.message === 'string'
-        ) {
-          return new Response(error.message, { status: 400 })
-        } else {
-          return new Response('Invalid JSON', { status: 400 })
-        }
-      }
     }
 
     const context = () => contextFunction(request)
